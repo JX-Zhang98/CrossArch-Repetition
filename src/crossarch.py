@@ -5,6 +5,11 @@ import km
 import time
 import os
 import json
+import multiprocessing as mp
+
+o1 = lambda commit: os.path.join("/mnt", "panda", "kernel", "arm64-testcase-new", commit.split('/')[0], "out_dir", "O1", "vmlinux")
+o2 = lambda commit: os.path.join("/mnt", "panda", "kernel", "arm64-testcase", commit, "vmlinux")
+o3 = lambda commit: os.path.join("/mnt", "panda", "kernel", "arm64-testcase-new", commit.split('/')[0], "out_dir", "O1", "vmlinux")
 
 def compare_two_funcs(bin1, func1, bin2, func2):
     t0 = time.time()
@@ -30,15 +35,95 @@ def compare_two_funcs(bin1, func1, bin2, func2):
     return sim
 
 
-def get_func():
-    f = open("/home/codesim/xl/config/func_list")
+def get_funcs():
+    f = open("../config/func_list")
     funcs = []
     for line in f.readlines():
         func = line.split("\n")[0]
         funcs.append(func)
     return funcs
 
+
+def get_commits():
+    f = open("../config/commit_list")
+    commits = []
+    for line in f.readlines():
+        commit = line.split("\n")[0]
+        commits.append(commit)
+    return commits
+
+def list_average(sim_list):
+    available_count = 0
+    sum = 0
+    for i in sim_list:
+        if not isinstance(i, str):
+            sum += i
+            available_count += 1
+    return sum/available_count
+
+
+
 if __name__ == '__main__':
+    funcs = get_funcs()
+    commits = get_commits()
+    funcs = funcs[0:5]
+    commits = commits[0:5]
+
+    # different funcs
+    sim_list = []
+    pool = mp.Pool(5)
+    result = [pool.apply_async(compare_two_funcs, args=(o1(commits[t]), funcs[i], o1(commits[t]), funcs[j]))
+        for t in range(5) for i in range(5) for j in range(i+1, 5)]
+    pool.close()
+    sim_list += [p.get() for p in result]
+    average_sim = list_average(sim_list)
+    print('average similarity among different funcs: {}'.format(average_sim))
+    with open('conclusion', 'a+') as f:
+        f.write('average similarity among different funcs: {}\n'.format(average_sim))
+
+    # same func in different commits
+    sim_list = []
+    pool = mp.Pool(5)
+    result = [pool.apply_async(compare_two_funcs, args=(o1(commits[i]), funcs[t], o1(commits[j]), funcs[t]))
+        for t in range(5) for i in range(5) for j in range(i+1, 5)]
+    pool.close()
+    sim_list += [p.get() for p in result]
+    average_sim = list_average(sim_list)
+    print('average similarity among same func different commits with optimization in O1: {}'.format(average_sim))
+    with open('conclusion', 'a+') as f:
+        f.write('average similarity among same func different commits with optimization in O1: {}\n'.format(average_sim))
+
+    # same func in same commit with different optimizations
+    # o1 vs o2
+    sim_list = []
+    pool = mp.Pool(5)
+    result = [pool.apply_async(compare_two_funcs, args=(o1(commits[i]), funcs[j], o2(commits[i]), funcs[j]))
+        for i in range(5) for j in range(5)]
+    pool.close()
+    sim_list += [p.get() for p in result]
+
+    # o1 vs o3
+    pool = mp.Pool(5)
+    result = [pool.apply_async(compare_two_funcs, args=(o1(commits[i]), funcs[j], o3(commits[i]), funcs[j]))
+        for i in range(5) for j in range(5)]
+    pool.close()
+    sim_list += [p.get() for p in result]
+
+    # o2 vs o3
+    pool = mp.Pool(5)
+    result = [pool.apply_async(compare_two_funcs, args=(o2(commits[i]), funcs[j], o3(commits[i]), funcs[j]))
+        for i in range(5) for j in range(5)]
+    pool.close()
+    sim_list += [p.get() for p in result]
+
+    average_sim = list_average(sim_list)
+    print('average similarity among same func in same commit with different optimizations: {}'.format(average_sim))
+    with open('conclusion', 'a+') as f:
+        f.write('average similarity among same func in same commit with different optimizations: {}\n'.format(average_sim))
+        f.write('---------------------------------------------------------')
+
+
+    '''
     # all_func = get_func() # a list of func names
     
     # some simple test
@@ -50,7 +135,7 @@ if __name__ == '__main__':
     
     for func in check_func_list:
         sim = compare_two_funcs(bin1, func,  bin2, func) # similarity of two funcs, between 0 and 1 
-
+'''
 
 
 
