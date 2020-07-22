@@ -37,7 +37,7 @@ def compare_two_funcs(bin1, func1, bin2, func2):
     subdic = {}
     subdic['sim'] = sim
     subdic['timeuse'] = t2-t0
-    dic[''.join(bin1, "@", func1, ":", bin2, "@", func2)] = subdic
+    dic[''.join((bin1, "@", func1, ":", bin2, "@", func2))] = subdic
     return sim, dic
 
 
