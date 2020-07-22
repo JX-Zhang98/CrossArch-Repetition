@@ -21,7 +21,7 @@ def compare_two_funcs(bin1, func1, bin2, func2):
         sim = ans / min(len(weight), len(weight[0]))
     except:
         sim = 'Error!'
-    f = open('exec_result', 'a+')    
+    f = open('exec_record', 'a+')    
     f.write('-----------------------------------------------\n')
     f.write('func1 : {}@{}\n'.format(bin1, func1))
     f.write('func2 : {}@{}\n'.format(bin2, func2))
@@ -32,7 +32,13 @@ def compare_two_funcs(bin1, func1, bin2, func2):
     f.write('time cost for km algorithm {} s\n'.format(t2 - t1))
     f.write('time cost total {} s\n'.format(t2 - t0))
     f.close()
-    return sim
+
+    dic = {}
+    subdic = {}
+    subdic['sim'] = sim
+    subdic['timeuse'] = t2-t0
+    dic[''.join(bin1, "@", func1, ":", bin2, "@", func2)] = subdic
+    return sim, dic
 
 
 def get_funcs():
@@ -69,25 +75,33 @@ if __name__ == '__main__':
     funcs = funcs[0:5]
     commits = commits[0:5]
 
+    sim_data = {}
     # different funcs
     sim_list = []
     pool = mp.Pool(5)
     result = [pool.apply_async(compare_two_funcs, args=(o1(commits[t]), funcs[i], o1(commits[t]), funcs[j]))
         for t in range(5) for i in range(5) for j in range(i+1, 5)]
     pool.close()
+    for p in result:
+        res = p.get()
+        sim_list += res[0]
+        sim_data
     sim_list += [p.get() for p in result]
     average_sim = list_average(sim_list)
     print('average similarity among different funcs: {}'.format(average_sim))
     with open('conclusion', 'a+') as f:
         f.write('average similarity among different funcs: {}\n'.format(average_sim))
-
+    
     # same func in different commits
     sim_list = []
     pool = mp.Pool(5)
     result = [pool.apply_async(compare_two_funcs, args=(o1(commits[i]), funcs[t], o1(commits[j]), funcs[t]))
         for t in range(5) for i in range(5) for j in range(i+1, 5)]
     pool.close()
-    sim_list += [p.get() for p in result]
+    for p in result:
+        res = p.get()
+        sim_list += res[0]
+        sim_data = {**sim_data, **res[1]}
     average_sim = list_average(sim_list)
     print('average similarity among same func different commits with optimization in O1: {}'.format(average_sim))
     with open('conclusion', 'a+') as f:
@@ -100,6 +114,10 @@ if __name__ == '__main__':
     result = [pool.apply_async(compare_two_funcs, args=(o1(commits[i]), funcs[j], o2(commits[i]), funcs[j]))
         for i in range(5) for j in range(5)]
     pool.close()
+    for p in result:
+        res = p.get()
+        sim_list += res[0]
+        sim_data = {**sim_data, **res[1]}
     sim_list += [p.get() for p in result]
 
     # o1 vs o3
@@ -107,6 +125,10 @@ if __name__ == '__main__':
     result = [pool.apply_async(compare_two_funcs, args=(o1(commits[i]), funcs[j], o3(commits[i]), funcs[j]))
         for i in range(5) for j in range(5)]
     pool.close()
+    for p in result:
+        res = p.get()
+        sim_list += res[0]
+        sim_data = {**sim_data, **res[1]}
     sim_list += [p.get() for p in result]
 
     # o2 vs o3
@@ -114,6 +136,10 @@ if __name__ == '__main__':
     result = [pool.apply_async(compare_two_funcs, args=(o2(commits[i]), funcs[j], o3(commits[i]), funcs[j]))
         for i in range(5) for j in range(5)]
     pool.close()
+    for p in result:
+        res = p.get()
+        sim_list += res[0]
+        sim_data = {**sim_data, **res[1]}
     sim_list += [p.get() for p in result]
 
     average_sim = list_average(sim_list)
@@ -121,22 +147,9 @@ if __name__ == '__main__':
     with open('conclusion', 'a+') as f:
         f.write('average similarity among same func in same commit with different optimizations: {}\n'.format(average_sim))
         f.write('---------------------------------------------------------')
+    with open('exec_result.json', 'a+') as f:
+        json.dump(sim_data, f)
 
-
-    '''
-    # all_func = get_func() # a list of func names
     
-    # some simple test
-
-    # same function in different version with same optimization class (O2)
-    bin1 = '/mnt/panda/kernel/arm64-new/32a4e169039927bfb6ee9f0ccbbe3a8aaf13a4bc/14e1e38e484cf24cdfc19179ea7a5e71b11d3dd1/vmlinux'
-    bin2 = '/mnt/panda/kernel/arm64-new/8ba8682107ee2ca3347354e018865d8e1967c5f4/a9a400b73ffb498d47a6cb59404e278d227d22e3/vmlinux'
-    check_func_list = ['environ_read', 'get_task_ioprio']
-    
-    for func in check_func_list:
-        sim = compare_two_funcs(bin1, func,  bin2, func) # similarity of two funcs, between 0 and 1 
-'''
-
-
 
 
