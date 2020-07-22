@@ -84,7 +84,7 @@ if __name__ == '__main__':
     pool.close()
     for p in result:
         res = p.get()
-        sim_list += res[0]
+        sim_list.append(res[0])
         sim_data = {**sim_data, **res[1]}
     # sim_list += [p.get() for p in result]
     average_sim = list_average(sim_list)
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     pool.close()
     for p in result:
         res = p.get()
-        sim_list += res[0]
+        sim_list.append(res[0])
         sim_data = {**sim_data, **res[1]}
     average_sim = list_average(sim_list)
     print('average similarity among same func different commits with optimization in O1: {}'.format(average_sim))
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     pool.close()
     for p in result:
         res = p.get()
-        sim_list += res[0]
+        sim_list.append(res[0])
         sim_data = {**sim_data, **res[1]}
     # sim_list += [p.get() for p in result]
 
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     pool.close()
     for p in result:
         res = p.get()
-        sim_list += res[0]
+        sim_list.append(res[0])
         sim_data = {**sim_data, **res[1]}
     # sim_list += [p.get() for p in result]
 
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     pool.close()
     for p in result:
         res = p.get()
-        sim_list += res[0]
+        sim_list.append(res[0])
         sim_data = {**sim_data, **res[1]}
     # sim_list += [p.get() for p in result]
 
