@@ -85,8 +85,8 @@ if __name__ == '__main__':
     for p in result:
         res = p.get()
         sim_list += res[0]
-        sim_data
-    sim_list += [p.get() for p in result]
+        sim_data = {**sim_data, **res[1]}
+    # sim_list += [p.get() for p in result]
     average_sim = list_average(sim_list)
     print('average similarity among different funcs: {}'.format(average_sim))
     with open('conclusion', 'a+') as f:
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         res = p.get()
         sim_list += res[0]
         sim_data = {**sim_data, **res[1]}
-    sim_list += [p.get() for p in result]
+    # sim_list += [p.get() for p in result]
 
     # o1 vs o3
     pool = mp.Pool(5)
@@ -129,7 +129,7 @@ if __name__ == '__main__':
         res = p.get()
         sim_list += res[0]
         sim_data = {**sim_data, **res[1]}
-    sim_list += [p.get() for p in result]
+    # sim_list += [p.get() for p in result]
 
     # o2 vs o3
     pool = mp.Pool(5)
@@ -140,7 +140,7 @@ if __name__ == '__main__':
         res = p.get()
         sim_list += res[0]
         sim_data = {**sim_data, **res[1]}
-    sim_list += [p.get() for p in result]
+    # sim_list += [p.get() for p in result]
 
     average_sim = list_average(sim_list)
     print('average similarity among same func in same commit with different optimizations: {}'.format(average_sim))
