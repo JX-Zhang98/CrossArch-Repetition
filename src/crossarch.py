@@ -26,11 +26,12 @@ def compare_two_funcs(bin1, func1, bin2, func2):
     f.write('func1 : {}@{}\n'.format(bin1, func1))
     f.write('func2 : {}@{}\n'.format(bin2, func2))
     f.write("The similarity between two function is {}\n".format(sim))
-    f.write('time cost for preprocessing func1 {} s\n'.format(time_used[1] - time_used[0]))
-    f.write('time cost for preprocessing func2 {} s\n'.format(time_used[2] - time_used[1]))
-    f.write('time cost for count weight {} s\n'.format(time_used[3] - time_used[2]))
-    f.write('time cost for km algorithm {} s\n'.format(t2 - t1))
-    f.write('time cost total {} s\n'.format(t2 - t0))
+    if sim!='Error!':
+        f.write('time cost for preprocessing func1 {} s\n'.format(time_used[1] - time_used[0]))
+        f.write('time cost for preprocessing func2 {} s\n'.format(time_used[2] - time_used[1]))
+        f.write('time cost for count weight {} s\n'.format(time_used[3] - time_used[2]))
+        f.write('time cost for km algorithm {} s\n'.format(t2 - t1))
+        f.write('time cost total {} s\n'.format(t2 - t0))
     f.close()
 
     dic = {}
