@@ -9,7 +9,7 @@ import multiprocessing as mp
 
 o1 = lambda commit: os.path.join("/mnt", "panda", "kernel", "arm64-testcase-new", commit.split('/')[0], "out_dir", "O1", "vmlinux")
 o2 = lambda commit: os.path.join("/mnt", "panda", "kernel", "arm64-testcase", commit, "vmlinux")
-o3 = lambda commit: os.path.join("/mnt", "panda", "kernel", "arm64-testcase-new", commit.split('/')[0], "out_dir", "O1", "vmlinux")
+o3 = lambda commit: os.path.join("/mnt", "panda", "kernel", "arm64-testcase-new", commit.split('/')[0], "out_dir", "O3", "vmlinux")
 
 def compare_two_funcs(bin1, func1, bin2, func2):
     t0 = time.time()
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     commits = commits[0:10]
     # take the first function in first commit as an example
     sim_data = {}
-    threads = 10
+    threads = 20
     choosen_func = 0
     choosen_commit = 0
     choosen_opt = o2
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     pool = mp.Pool(threads)
     result = [pool.apply_async(compare_two_funcs, args=(choosen_opt(commits[choosen_commit]), funcs[choosen_func], 
                                                         choosen_opt(commits[t]), funcs[choosen_func]))
-                                                        for t in range(10)]
+                                                        for t in range(10) if t!=choosen_commit]
     pool.close()
     for p in result:
         res = p.get()
@@ -158,7 +158,8 @@ if __name__ == '__main__':
     pool = mp.Pool(threads)
     result = [pool.apply_async(compare_two_funcs, args=(choosen_opt(commits[choosen_commit]), funcs[choosen_func], 
                                                         choosen_opt(commits[i]), funcs[j]))
-                                                        for i in range(5) for j in range(10)]
+                                                        for i in range(5) for j in range(10)
+                                                        if i!=choosen_commit or j!=choosen_func]
     pool.close()
     for p in result:
         res = p.get()
